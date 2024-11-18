@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useReadContract } from "thirdweb/react";
+import { TransactionButton, useReadContract } from "thirdweb/react";
 import { contract } from "../utils/contract";
+import { prepareContractCall } from "thirdweb";
+import { TaskCard } from "./TaskCard";
 
 export const TaskList = () => {
     const [task, setTask] = useState("");
@@ -16,7 +18,14 @@ export const TaskList = () => {
         <div>
         <div>TaskList</div>
         {!isLoadingTasks && tasks!.length > 0 ? (
-            <></>
+            tasks?.map((task: any, index: number) => (
+                <TaskCard
+                    key={index}
+                    taskId={index}
+                    task={task.description}
+                    isCompleted={task.isCompleted}
+                />
+            ))
         ): (
             <>
                 <h2>Create Tasks</h2>
@@ -35,6 +44,21 @@ export const TaskList = () => {
                         marginBottom: "15px",
                     }}
                 />
+                <TransactionButton
+                    transaction={() => (
+                        prepareContractCall({
+                            contract: contract,
+                            method: "createTask",
+                            params: [task],
+                        })
+                    )}
+                    onTransactionConfirmed={() => {
+                        setTask("")
+                        alert("Task created successfully")
+                    }}
+                >
+                    Add Task
+                </TransactionButton>
             </>
         )}
         </div>
